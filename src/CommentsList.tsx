@@ -54,7 +54,7 @@ class CommentsList extends React.Component<any, any>
         objectData = JSON.parse(JSON.stringify(objectData));
         
         var newState = {
-			objectData: [objectData]
+			objectData: objectData
 		};
              
         manywho.state.setComponent(this.componentId, newState, this.flowKey, true);
