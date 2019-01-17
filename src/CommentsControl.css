@@ -116,6 +116,7 @@
 .comment-list-body
 {
     background-color: #fefefe;
+    min-height: 30px;
 }
 
 .comment-bubble
