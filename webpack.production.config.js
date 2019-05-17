@@ -1,10 +1,9 @@
 const path = require('path');
-const fs = require('fs');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const WriteFilePlugin = require('write-file-webpack-plugin');
 const flow = require('./package.json').flow;
 
-module.exports = function() {
+module.exports = function(env) {
     const config = {
         entry: "./src/index.tsx",
         output: {
@@ -13,12 +12,9 @@ module.exports = function() {
         },
         devtool: 'inline-source-map',
         resolve: {
-            extensions: [".ts", ".tsx", ".js", ".json"],
+            extensions: [".ts", ".tsx", ".js", ".json"]
         },
-        devServer: {
-            contentBase: './build'
-        },
-        mode: 'development',
+        mode: 'production',
         module: {
             rules: [
                 {
@@ -60,16 +56,6 @@ module.exports = function() {
             new MiniCssExtractPlugin({ filename: flow.filenames.css })
         ],
     }
-
-    if (!fs.existsSync('./build'))
-        fs.mkdirSync('./build');
-
-    let template = fs.readFileSync('./template.html').toString();
-    template = template
-        .replace('{{tenantId}}', flow.tenantId)
-        .replace('{{flowId}}', flow.id)
-        .replace('{{flowVersionId}}', flow.versionId)
-    fs.writeFileSync('./build/index.html', template);
 
     return config;
 };

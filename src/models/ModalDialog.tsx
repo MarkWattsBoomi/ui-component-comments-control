@@ -1,36 +1,33 @@
 import * as React from 'react';
 
+import './ModalDialog.css';
+
 // Declaration of the component as React Class Component
-class ModalDialog extends React.Component<any,any>
- {
-  
-    modal : any;
+class ModalDialog extends React.Component<any, any> {
+
+    modal: any;
   // Init of the component before it is mounted.
-  constructor(props : any) 
-  {
+    constructor(props: any) {
     super(props);
 
     this.handleKeyUp = this.handleKeyUp.bind(this);
     this.handleOutsideClick = this.handleOutsideClick.bind(this);
   }
-  
+
   // Add listeners immediately after the component is mounted.
-  componentDidMount() 
-  {
+    componentDidMount() {
     window.addEventListener('keyup', this.handleKeyUp, false);
     document.addEventListener('click', this.handleOutsideClick, false);
   }
 
   // Remove listeners immediately before a component is unmounted and destroyed.
-  componentWillUnmount() 
-  {
+    componentWillUnmount() {
     window.removeEventListener('keyup', this.handleKeyUp, false);
     document.removeEventListener('click', this.handleOutsideClick, false);
   }
-  
+
   // Handle the key press event.
-  handleKeyUp(e : any) 
-  {
+    handleKeyUp(e: any) {
     const { onCloseRequest } = this.props;
     const keys = {
       27: () => {
@@ -40,40 +37,36 @@ class ModalDialog extends React.Component<any,any>
       },
     };
 
-    //if (keys[e.keyCode]) { keys[e.keyCode](); }
+    // if (keys[e.keyCode]) { keys[e.keyCode](); }
   }
-  
+
   // Handle the mouse click on browser window.
-  handleOutsideClick(e : any) 
-  {
+    handleOutsideClick(e: any) {
     const { onCloseRequest } = this.props;
 
-    //if (!this.modal) {
+    // if (!this.modal) {
     //  if (!this.modal.contains(e.target)) {
     //    onCloseRequest();
     //    document.removeEventListener('click', this.handleOutsideClick, false);
      // }
-    //}
+    // }
   }
-  
+
   // Render the component passing onCloseRequest and children as props.
-  render () {
+    render() {
     const {
       onCloseRequest,
       children,
       classes,
     } = this.props;
-    
+
     return (
       <div className="modal-redaction">
-        <div className="modal" ref={node => (this.modal = node)}>
+        <div className="modal" ref={(node) => (this.modal = node)}>
           <div className="modal-content">
             {children}
           </div>
         </div>
-
-        <button type="button" className="modal-close-button" onClick={onCloseRequest}
-        />
       </div>
     );
   }
