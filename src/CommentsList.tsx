@@ -2,14 +2,14 @@ declare var manywho: IManywho;
 
 import * as React from 'react';
 import CommentBubble from './CommentBubble';
-import './CommentsControl.css';
-import { FlowField } from './models/FlowField';
-import { FlowObjectData } from './models/FlowObjectData';
-import { FlowObjectDataArray } from './models/FlowObjectDataArray';
-import { FlowObjectDataProperty } from './models/FlowObjectDataProperty';
-import { FlowPage } from './models/FlowPage';
-import { IManywho } from './models/interfaces';
-import ModalDialog from './models/ModalDialog';
+import './css/CommentsControl.css';
+import { FlowField } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowField';
+import { FlowObjectData } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowObjectData';
+import { FlowObjectDataArray } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowObjectDataArray';
+import { FlowObjectDataProperty } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowObjectDataProperty';
+import { FlowPage } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowPage';
+import { IManywho } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/interfaces';
+import ModalDialog from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/ModalDialog';
 
 class CommentsList extends FlowPage {
 
@@ -115,7 +115,7 @@ class CommentsList extends FlowPage {
         const comments = [];
         if (this.fields[this.attributes['CommentsListField'].value]) {
             for (const item of (this.fields[this.attributes['CommentsListField'].value].value as FlowObjectDataArray).items) {
-                comments.push(<CommentBubble data={item} props={this.props} canDelete={canDelete} delete={this.deleteComment}></CommentBubble>);
+                comments.push(<CommentBubble data={item} props={this.props} canDelete={canDelete} delete={this.deleteComment}/>);
             }
         }
 

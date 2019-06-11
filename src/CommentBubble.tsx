@@ -1,8 +1,10 @@
 declare var manywho: any;
 import * as React from 'react';
-import { FlowObjectData } from './models/FlowObjectData';
+import { FlowObjectData } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowObjectData';
 
-class CommentBubble extends React.Component <any, any> {
+export class CommentBubble extends React.Component <any, any> {
+    context: any;
+    state: any;
     constructor(props: any) {
         super(props);
     }
