@@ -1,15 +1,10 @@
-declare var manywho: IManywho;
 
+import { FlowField, FlowObjectData, FlowObjectDataArray, FlowObjectDataProperty, FlowPage, ModalDialog } from 'flow-component-model';
 import * as React from 'react';
 import CommentBubble from './CommentBubble';
 import './css/CommentsControl.css';
-import { FlowField } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowField';
-import { FlowObjectData } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowObjectData';
-import { FlowObjectDataArray } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowObjectDataArray';
-import { FlowObjectDataProperty } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowObjectDataProperty';
-import { FlowPage } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowPage';
-import { IManywho } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/interfaces';
-import ModalDialog from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/ModalDialog';
+
+declare var manywho: any;
 
 class CommentsList extends FlowPage {
 
@@ -132,14 +127,14 @@ class CommentsList extends FlowPage {
                                         className="glyphicon glyphicon-remove modal-dialog-header-button"
                                         title="Close"
                                         onClick={(e) => this.closeModal(false)}
-                                    ></span>
+                                    />
                                 </div>
                             </div>
                             <div className="modal-dialog-body">
                                 <div className="modal-dialog-body-client">
                                     <div className="modal-dialog-input-row">
                                         <span className="modal-dialog-input-label">Comment</span>
-                                        <input className="modal-dialog-input" ref={(newComment) => { this.newComment = newComment; }} type="text" width="60px"></input>
+                                        <input className="modal-dialog-input" ref={(newComment) => { this.newComment = newComment; }} type="text" width="60px"/>
                                     </div>
                                 </div>
                             </div>
@@ -157,7 +152,7 @@ class CommentsList extends FlowPage {
                             <span className="comment-list-header-title">{caption}</span>
                         </div>
                         <div style={{float: 'right'}}>
-                            <span className="glyphicon glyphicon-plus comment-list-header-button" title="Add Comment" onClick={this.addComment.bind(this)}></span>
+                            <span className="glyphicon glyphicon-plus comment-list-header-button" title="Add Comment" onClick={this.addComment.bind(this)}/>
                         </div>
 
                     </div>

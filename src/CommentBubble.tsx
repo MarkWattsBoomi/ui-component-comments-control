@@ -1,6 +1,6 @@
-declare var manywho: any;
+import { FlowObjectData } from 'flow-component-model';
 import * as React from 'react';
-import { FlowObjectData } from '/Operational Data/Flow UI Custom Components/2019 Version/FlowComponentModel/src/FlowObjectData';
+declare var manywho: any;
 
 export class CommentBubble extends React.Component <any, any> {
     context: any;
@@ -21,7 +21,7 @@ export class CommentBubble extends React.Component <any, any> {
 
             let deleteButton: JSX.Element;
             if (this.props.canDelete == true) {
-                deleteButton = <span className="glyphicon glyphicon-remove delete-comment-button" title="Remove Comment" onClick={(e) => {this.props.delete(this.props.data); }}></span>;
+                deleteButton =  <span className="glyphicon glyphicon-remove delete-comment-button" title="Remove Comment" onClick={(e) => {this.props.delete(this.props.data); }}/>;
             }
 
             return  <div className="comment-bubble">
@@ -40,7 +40,7 @@ export class CommentBubble extends React.Component <any, any> {
                         </div>
                     </div>;
         } else {
-            return <div></div>;
+            return  <div/>;
         }
 
     }
