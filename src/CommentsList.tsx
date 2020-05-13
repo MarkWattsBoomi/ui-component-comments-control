@@ -1,23 +1,55 @@
 
-import { FlowField, FlowObjectData, FlowObjectDataArray, FlowObjectDataProperty, FlowPage, ModalDialog } from 'flow-component-model';
+import { eContentType, eLoadingState, FlowComponent, FlowField, FlowObjectData, FlowObjectDataArray, FlowObjectDataProperty, ModalDialog, modalDialogButton } from 'flow-component-model';
 import * as React from 'react';
+import AddCommentForm from './AddCommentForm';
 import CommentBubble from './CommentBubble';
 import './css/CommentsControl.css';
 
 declare var manywho: any;
 
-class CommentsList extends FlowPage {
+class CommentsList extends FlowComponent {
 
-    modalShown: boolean = false;
+    dialogVisible: boolean = false;
+    dialogTitle: string = '';
+    dialogButtons: any = [];
+    dialogContent: any;
+    dialogOnClose: any;
+    dialogForm: any;
 
     newComment: any;
 
     constructor(props: any) {
         super(props);
-
         this.addComment = this.addComment.bind(this);
-        this.closeModal = this.closeModal.bind(this);
+        this.commentAdd = this.commentAdd.bind(this);
+        this.showDialog = this.showDialog.bind(this);
+        this.hideDialog = this.hideDialog.bind(this);
         this.deleteComment = this.deleteComment.bind(this);
+    }
+
+    async componentDidMount() {
+        await super.componentDidMount();
+
+        this.forceUpdate();
+    }
+
+    async showDialog(title: string, content: any, onClose: any, buttons: modalDialogButton[]) {
+        this.dialogVisible = true;
+        this.dialogTitle = title;
+        this.dialogContent = content;
+        this.dialogOnClose = onClose;
+        this.dialogButtons = buttons;
+        return this.forceUpdate();
+    }
+
+    async hideDialog() {
+        this.dialogVisible = false;
+        this.dialogTitle = '';
+        this.dialogContent = undefined;
+        this.dialogOnClose = undefined;
+        this.dialogButtons = [];
+        this.dialogForm = undefined;
+        return this.forceUpdate();
     }
 
     compareObjectData(one: FlowObjectData , two: FlowObjectData): boolean {
@@ -32,118 +64,97 @@ class CommentsList extends FlowPage {
     }
 
     async deleteComment(comment: any) {
-        const comments: FlowField = this.fields[this.attributes['CommentsListField'].value];
-        const items: FlowObjectDataArray = comments.value as FlowObjectDataArray ;
-        for (let pos = items.items.length - 1; pos >= 0; pos--) {
-            if (this.compareObjectData(comment, items.items[pos]) === true) {
-                items.items.splice(pos, 1);
+        const comments: FlowObjectDataArray = this.getStateValue() as FlowObjectDataArray;
+        for (let pos = comments.items.length - 1; pos >= 0; pos--) {
+            if (this.compareObjectData(comment, comments.items[pos]) === true) {
+                comments.items.splice(pos, 1);
             }
         }
-
-        await this.updateValues([comments]);
+        await this.setStateValue(comments);
         if (this.attributes['RemoveCommentOutcome'] && this.attributes['RemoveCommentOutcome'].value.length > 0 && this.outcomes[this.attributes['RemoveCommentOutcome'].value]) {
                 await this.triggerOutcome(this.attributes['RemoveCommentOutcome'].value);
             }
-        await this.loadValues();
+        await this.forceUpdate();
     }
 
-    addComment() {
-        this.modalShown = true;
-        this.forceUpdate();
+    async addComment() {
+        // show dialog
+        const content: any = [];
+        content.push(
+            <AddCommentForm
+                ref={(e: any) => { this.dialogForm = e; }}
+            />,
+        );
+        const buttons: modalDialogButton[] = [];
+        buttons.push(new modalDialogButton('Save', this.commentAdd));
+        buttons.push(new modalDialogButton('Cancel', this.hideDialog));
+        this.showDialog('Import Users', content, this.hideDialog, buttons);
     }
 
-    async closeModal(save: boolean) {
-        this.modalShown = false;
-        if (save === true) {
-            const comment = new FlowObjectData();
-            comment.developerName = 'Comment';
-            comment.isSelected = true;
-            comment.addProperty(new FlowObjectDataProperty({
-                contentFormat: null,
-                contentType: 'ContentString',
-                contentValue: this.user.firstName +  ' ' + this.user.lastName,
-                developerName: 'Author',
-                objectData: null,
-                typeElementId: null,
-                typeElementPropertyId: null}));
-            comment.addProperty(new FlowObjectDataProperty({
-                contentFormat: null,
-                contentType: 'ContentDateTime',
-                contentValue: new Date().toISOString(),
-                developerName: 'Date',
-                objectData: null,
-                typeElementId: null,
-                typeElementPropertyId: null}));
-            comment.addProperty(new FlowObjectDataProperty({
-                contentFormat: null,
-                contentType: 'ContentString',
-                contentValue: this.newComment.value,
-                developerName: 'Comment',
-                objectData: null,
-                typeElementId: null,
-                typeElementPropertyId: null}));
+    async commentAdd() {
+        const frm: AddCommentForm  = this.dialogForm;
+        const comment: string = frm.comment.value;
+        const author: string = this.user ? this.user.email : 'anonymous';
+        const time: string = new Date().toISOString();
 
-            const comments: FlowField = this.fields[this.attributes['CommentsListField'].value];
-            (comments.value as FlowObjectDataArray).addItem(comment);
+        const stateVal: FlowObjectDataArray = this.getStateValue() as FlowObjectDataArray;
 
-            await this.updateValues([comments]);
-            if (this.attributes['AddCommentOutcome'] && this.attributes['AddCommentOutcome'].value.length > 0 && this.outcomes[this.attributes['AddCommentOutcome'].value]) {
-                await this.triggerOutcome(this.attributes['AddCommentOutcome'].value);
-            }
-            await this.loadValues();
-        } else {
-            this.forceUpdate();
-        }
+        const newComment: FlowObjectData = FlowObjectData.newInstance('Comment');
+        newComment.addProperty(FlowObjectDataProperty.newInstance('Author', eContentType.ContentString, author));
+        newComment.addProperty(FlowObjectDataProperty.newInstance('Date', eContentType.ContentDateTime, time));
+        newComment.addProperty(FlowObjectDataProperty.newInstance('Comment', eContentType.ContentString, comment));
+
+        stateVal.addItem(newComment);
+        await this.setStateValue(stateVal);
+        await this.hideDialog();
     }
 
     render() {
 
         const caption: string = this.getAttribute('Title') || 'Comments';
         const canDelete: boolean = this.getAttribute('Can Delete') == 'true' || this.getAttribute('CanDelete') == 'true' ? true : false;
-
+        const readOnly: boolean = this.model.readOnly;
         const height = this.model.height + 'px';
 
         const style: any = {};
         style.width = '100%';
         style.height = height;
 
-        const comments = [];
-        if (this.fields[this.attributes['CommentsListField'].value]) {
-            for (const item of (this.fields[this.attributes['CommentsListField'].value].value as FlowObjectDataArray).items) {
-                comments.push(<CommentBubble data={item} props={this.props} canDelete={canDelete} delete={this.deleteComment}/>);
+        const comments: any[] = [];
+        if (this.loadingState === eLoadingState.ready) {
+            const stateVal: FlowObjectDataArray = this.getStateValue() as FlowObjectDataArray;
+            if (stateVal) {
+                stateVal.items.forEach((Comment: FlowObjectData) => {
+                    comments.push(
+                        <CommentBubble
+                            data={Comment}
+                            props={this.props}
+                            canDelete={canDelete}
+                            delete={this.deleteComment}
+                        />,
+                    );
+                });
             }
         }
 
+        let addButton: any;
+        if (readOnly === false) {
+            addButton = (
+                <span className="glyphicon glyphicon-plus comment-list-header-button" title="Add Comment" onClick={this.addComment.bind(this)}/>
+            );
+        }
+
         let modal: any;
-        if (this.modalShown) {
-            modal =  <ModalDialog onCloseRequest={this.closeModal}>
-                        <div className="modal-dialog">
-                            <div className="modal-dialog-header">
-                                <div style={{float: 'left'}}>
-                                    <span className="modal-dialog-header-title">Add a new document</span>
-                                </div>
-                                <div style={{float: 'right'}}>
-                                    <span
-                                        className="glyphicon glyphicon-remove modal-dialog-header-button"
-                                        title="Close"
-                                        onClick={(e) => this.closeModal(false)}
-                                    />
-                                </div>
-                            </div>
-                            <div className="modal-dialog-body">
-                                <div className="modal-dialog-body-client">
-                                    <div className="modal-dialog-input-row">
-                                        <span className="modal-dialog-input-label">Comment</span>
-                                        <input className="modal-dialog-input" ref={(newComment) => { this.newComment = newComment; }} type="text" width="60px"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="modal-dialog-button-bar">
-                                <button className="modal-dialog-button-bar-button" title="Add Comment" onClick={(e) => this.closeModal(true)}>Add</button>
-                                <button className="modal-dialog-button-bar-button" title="Cancel" onClick={(e) => this.closeModal(false)}>Cancel</button>
-                            </div>
-                        </div>
-                    </ModalDialog>;
+        if (this.dialogVisible === true) {
+            modal = (
+                <ModalDialog
+                    title={this.dialogTitle}
+                    buttons={this.dialogButtons}
+                    onClose={this.dialogOnClose}
+                >
+                    {this.dialogContent}
+                </ModalDialog>
+            );
         }
 
         return <div className="comment-list">
@@ -152,9 +163,8 @@ class CommentsList extends FlowPage {
                             <span className="comment-list-header-title">{caption}</span>
                         </div>
                         <div style={{float: 'right'}}>
-                            <span className="glyphicon glyphicon-plus comment-list-header-button" title="Add Comment" onClick={this.addComment.bind(this)}/>
+                            {addButton}
                         </div>
-
                     </div>
                     <div className="comment-list-body">
                        {comments}
